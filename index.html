@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Gomoku.</title>
+    <script src="//fb.me/react-0.14.3.js"></script>
+    <script src="//fb.me/react-dom-0.14.3.js"></script>
+    <script src="//unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link href="//cdn.muicss.com/mui-0.9.9-rc2/css/mui.min.css" rel="stylesheet" type="text/css" />
+    <script src="//cdn.muicss.com/mui-0.9.9-rc2/js/mui.min.js"></script>
+    <style>
+    .none {
+    display: none !important;
+    }
+    /*.row::after {
+        content: "";
+        clear: both;
+        display: table;
+    }*/
+    table.board {
+        border-spacing: 0;
+        border-collapse: collapse;
+    }
+    table.board tbody tr td {
+        border: 1px solid lightslategray;
+        border-collapse: collapse;
+        width: 20px; height: 20px;
+        cursor: pointer;
+        background-color: lightyellow;
+        padding: 0;
+    }
+    table.board tbody tr td:not(.black):not(.white):hover {
+        background-color: #ffffc0;
+    }
+    table.board tbody tr td:not(.black):not(.white):hover div {
+        border-color: #ffffc0;
+    }
+    table.board tbody tr td div {
+        border: 1px solid lightyellow;
+        width: 8px; height: 8px;
+        margin: auto;
+        border-radius: 50%;
+    }
+    table.board tbody tr td.black div {
+        border-color: gray;
+        background-color: black;
+    }
+    table.board tbody tr td.white div {
+        border: 1px solid gray;
+        background-color: white;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="mui-container" id="root"></div>
+
+    <script type="text/babel" src="app.js"></script>
+  </body>
+</html>
