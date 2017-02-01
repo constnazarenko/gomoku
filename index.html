@@ -50,11 +50,17 @@
         border: 1px solid gray;
         background-color: white;
     }
+    table.board tbody tr td.lastmove {
+        background-color: lightgreen;
+    }
     </style>
   </head>
   <body>
     <div class="mui-container" id="root"></div>
 
-    <script type="text/babel" src="app.js"></script>
+    <script src="js/websock.js"></script>
+    <script src="js/util.js"></script>
+
+    <script type="text/babel" src="js/app.js"></script>
   </body>
 </html>
