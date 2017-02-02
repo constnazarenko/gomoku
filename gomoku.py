@@ -12,10 +12,12 @@ class Gomoku(WebSocketRequestHandler):
     waiting_opponent_move = False
     total_moves = 0
     board_length = 15
+    winning_sequence = 3
     board = []
 
     def new_websocket_client(self):
-        self.board = [[None] * self.board_length] * self.board_length
+        for i in range(1,self.board_length) :
+            self.board.append([None] * self.board_length)
 
         while True:
             ins, outs, excepts = select.select([self.request], [], [], 1)
@@ -98,11 +100,12 @@ class Gomoku(WebSocketRequestHandler):
 
                         ## CHECK WINNING MOVE HERE
                         win = False
-                        if self.total_moves >= 8 :
-                            if self.checkwinner(action['x'], action['y']) :
-                                win = True
-                                result = {'result': 'youwin'}
-                                self.send_frames([str.encode(json.dumps(result))])
+                        self.board[action['y']][action['x']] = self.im_black
+                    
+                        if self.checkwinner(action['x'], action['y']) :
+                            win = True
+                            result = {'result': 'youwin'}
+                            self.send_frames([str.encode(json.dumps(result))])
 
                         cur.execute('INSERT INTO match_moves (match_id, is_black, x, y, win) VALUES (%s,%s,%s,%s,%s) RETURNING made', [self.game_id, self.im_black, action['x'], action['y'], win])
                         con.commit()
@@ -110,9 +113,7 @@ class Gomoku(WebSocketRequestHandler):
                         self.last_move = items['made']
                         self.total_moves += 1
                         self.waiting_opponent_move = True
-                        self.board[action['y']][action['x']] = self.im_black
 
-                        
                     con.close()
 
                 if closed:
@@ -123,47 +124,93 @@ class Gomoku(WebSocketRequestHandler):
         xsum = 1
         xx = x + 1
         while xx < self.board_length :
-            xx += 1
             if self.board[y][xx] == self.im_black :
                 xsum += 1
             else :
                 break
-        
+            xx += 1
+
         xx = x - 1
         while xx >= 0 :
-            xx -= 1
             if self.board[y][xx] == self.im_black :
                 xsum += 1
             else :
                 break
+            xx -= 1
 
-        if xsum == 5 :
+        if xsum == self.winning_sequence :
             return True
 
         #y asis check
         ysum = 1
         yy = y + 1
         while yy < self.board_length :
-            yy += 1
             if self.board[yy][x] == self.im_black :
                 ysum += 1
             else :
                 break
-        
+            yy += 1
+
         yy = y - 1
         while yy >= 0 :
-            yy -= 1
             if self.board[yy][x] == self.im_black :
                 ysum += 1
             else :
                 break
+            yy -= 1
 
-        if ysum == 5 :
+        if ysum == self.winning_sequence :
             return True
 
         #left diagonal check
+        ldsum = 1
+        yy = y + 1
+        xx = x + 1
+        while yy < self.board_length and xx < self.board_length :
+            if self.board[yy][xx] == self.im_black :
+                ldsum += 1
+            else :
+                break
+            yy += 1
+            xx += 1
+
+        yy = y - 1
+        xx = x - 1
+        while yy >= 0 and xx >= 0 :
+            if self.board[yy][xx] == self.im_black :
+                ldsum += 1
+            else :
+                break
+            yy -= 1
+            xx -= 1
+
+        if ldsum == self.winning_sequence :
+            return True
 
         #right diagonal check
+        rdsum = 1
+        yy = y + 1
+        xx = x - 1
+        while yy < self.board_length and xx >= 0 :
+            if self.board[yy][xx] == self.im_black :
+                rdsum += 1
+            else :
+                break
+            yy += 1
+            xx -= 1
+
+        yy = y - 1
+        xx = x + 1
+        while yy >= 0 and xx < self.board_length :
+            if self.board[yy][xx] == self.im_black :
+                rdsum += 1
+            else :
+                break
+            yy -= 1
+            xx += 1
+
+        if rdsum == self.winning_sequence :
+            return True
 
 
 

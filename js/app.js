@@ -82,11 +82,11 @@ class GameBoard extends React.Component {
                 this.setState({squares: tmp, last_x: resp.x, last_y: resp.y, waiting_opponents_move: false, turn: 'Your turn!'});
                 break;
             case 'youwin' :
-                this.setState({waiting_opponents_move: true, turn: '<span style="color:#008000;">You win! =)</span>'});
+                this.setState({waiting_opponents_move: true, turn: 'YOU WON! =)'});
                 break;
             case 'oppwin' :
                 tmp[resp.y][resp.x] = this.state.antagonist;
-                this.setState({squares: tmp, last_x: resp.x, last_y: resp.y, waiting_opponents_move: true, turn: '<span style="color:#800000;">Your opponent has win. =(</span>'});
+                this.setState({squares: tmp, last_x: resp.x, last_y: resp.y, waiting_opponents_move: true, turn: 'YOUR OPPONENT WON. =('});
                 break;
             case 'error' :
                 alert(resp.message);
