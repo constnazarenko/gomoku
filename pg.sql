@@ -24,7 +24,8 @@ CREATE TABLE match_moves (
     is_black   boolean  NOT NULL,
     x          integer  NOT NULL,
     y          integer  NOT NULL,
-    made       timestamp with time zone DEFAULT now()
+    made       timestamp with time zone DEFAULT now(),
+    win        boolean DEFAULT FALSE
 );
 
 

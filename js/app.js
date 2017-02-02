@@ -66,6 +66,7 @@ class GameBoard extends React.Component {
 
     handleServerResponce(resp) {
         console.log(resp);
+        let tmp = this.state.squares;
         switch(resp.result) {
             case 'started' :
                 this.setState({matched: true, game_id: resp.game_id, turn: 'Waiting for opponent connection...'});
@@ -77,9 +78,15 @@ class GameBoard extends React.Component {
                 this.setState({black: resp.black, white: resp.white, waiting_opponents_move: false, turn: 'Your turn!'});
                 break;
             case 'moved' :
-                let tmp = this.state.squares;
                 tmp[resp.y][resp.x] = this.state.antagonist;
                 this.setState({squares: tmp, last_x: resp.x, last_y: resp.y, waiting_opponents_move: false, turn: 'Your turn!'});
+                break;
+            case 'youwin' :
+                this.setState({waiting_opponents_move: true, turn: '<span style="color:#008000;">You win! =)</span>'});
+                break;
+            case 'oppwin' :
+                tmp[resp.y][resp.x] = this.state.antagonist;
+                this.setState({squares: tmp, last_x: resp.x, last_y: resp.y, waiting_opponents_move: true, turn: '<span style="color:#800000;">Your opponent has win. =(</span>'});
                 break;
             case 'error' :
                 alert(resp.message);

@@ -11,14 +11,14 @@ class Gomoku(WebSocketRequestHandler):
     waiting_opponent_connect = False
     waiting_opponent_move = False
     total_moves = 0
+    board_length = 15
+    board = []
 
     def new_websocket_client(self):
-        rlist = [self.request]
-        
-        while True:
+        self.board = [[None] * self.board_length] * self.board_length
 
-            wlist = []
-            ins, outs, excepts = select.select(rlist, wlist, [], 1)
+        while True:
+            ins, outs, excepts = select.select([self.request], [], [], 1)
             if excepts: raise Exception("Socket exception")
 
             #waiting_opponent_connect check
@@ -39,7 +39,12 @@ class Gomoku(WebSocketRequestHandler):
                 cur = con.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
                 cur.execute('SELECT * FROM match_moves WHERE match_id = %s ORDER BY made DESC LIMIT 1', [self.game_id,])
                 items = cur.fetchone()
-                if items and items['is_black'] != self.im_black:
+                if items and items['is_black'] != self.im_black :
+                    if items['win'] :
+                        result = json.dumps({'result': 'oppwin','x':items['x'],'y':items['y']})
+                        self.send_frames([str.encode(result)])
+                        return
+                    self.board[items['y']][items['x']] = not self.im_black
                     result = json.dumps({'result': 'moved','x':items['x'],'y':items['y']})
                     self.send_frames([str.encode(result)])
                     self.waiting_opponent_move = False
@@ -90,19 +95,77 @@ class Gomoku(WebSocketRequestHandler):
 
                     #making a move
                     if action['action'] == 'move' :
-                        cur.execute('INSERT INTO match_moves (match_id, is_black, x, y) VALUES (%s,%s,%s,%s) RETURNING made', [self.game_id, self.im_black, action['x'], action['y']])
+
+                        ## CHECK WINNING MOVE HERE
+                        win = False
+                        if self.total_moves >= 8 :
+                            if self.checkwinner(action['x'], action['y']) :
+                                win = True
+                                result = {'result': 'youwin'}
+                                self.send_frames([str.encode(json.dumps(result))])
+
+                        cur.execute('INSERT INTO match_moves (match_id, is_black, x, y, win) VALUES (%s,%s,%s,%s,%s) RETURNING made', [self.game_id, self.im_black, action['x'], action['y'], win])
                         con.commit()
                         items = cur.fetchone()
                         self.last_move = items['made']
                         self.total_moves += 1
                         self.waiting_opponent_move = True
+                        self.board[action['y']][action['x']] = self.im_black
 
-                        ## CHECK WINNING MOVE HERE
-
+                        
                     con.close()
 
                 if closed:
                     self.send_close()
+
+    def checkwinner(self, x, y) :
+        #x asis check
+        xsum = 1
+        xx = x + 1
+        while xx < self.board_length :
+            xx += 1
+            if self.board[y][xx] == self.im_black :
+                xsum += 1
+            else :
+                break
+        
+        xx = x - 1
+        while xx >= 0 :
+            xx -= 1
+            if self.board[y][xx] == self.im_black :
+                xsum += 1
+            else :
+                break
+
+        if xsum == 5 :
+            return True
+
+        #y asis check
+        ysum = 1
+        yy = y + 1
+        while yy < self.board_length :
+            yy += 1
+            if self.board[yy][x] == self.im_black :
+                ysum += 1
+            else :
+                break
+        
+        yy = y - 1
+        while yy >= 0 :
+            yy -= 1
+            if self.board[yy][x] == self.im_black :
+                ysum += 1
+            else :
+                break
+
+        if ysum == 5 :
+            return True
+
+        #left diagonal check
+
+        #right diagonal check
+
+
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage="%prog [options] listen_port")
