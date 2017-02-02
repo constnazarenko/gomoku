@@ -12,7 +12,7 @@ class Gomoku(WebSocketRequestHandler):
     waiting_opponent_move = False
     total_moves = 0
     board_length = 15
-    winning_sequence = 3
+    winning_sequence = 5
     board = []
 
     def new_websocket_client(self):
