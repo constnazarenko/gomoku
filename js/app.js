@@ -5,7 +5,7 @@ class GameBoard extends React.Component {
         super(props);
 
         //connecnting to server
-        ws.open("ws://nazarenko.es/gomoku/socket/");
+        ws.open("ws://nazarenko.es:8888/");
 
         //creating board
         let tmp = Array(15).fill(null);
